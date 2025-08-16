@@ -5,7 +5,7 @@
   "description": "Automatically open the best search result for your query.",
   "browser_specific_settings": {
     "gecko": {
-      "id": "look-ahead@yourdomain.com",
+      "id": "@look-ahead.vmargb",
       "strict_min_version": "120.0"
     }
   },
@@ -16,13 +16,15 @@
     "tabs"
   ],
   "host_permissions": [
-    "https://duckduckgo.com/*"
+    "https://duckduckgo.com/*",
+    "https://www.google.com/*"
   ],
   "background": {
     "scripts": ["background.js"]
   },
   "action": {
-    "default_title": "Look Ahead"
+    "default_title": "Look Ahead",
+    "default_popup": "popup.html"
   },
   "omnibox": {
     "keyword": "la"
@@ -44,7 +46,7 @@
   },
   "content_scripts": [
     {
-      "matches": ["https://duckduckgo.com/*"],
+      "matches": ["https://duckduckgo.com/*", "https://www.google.com/*"],
       "js": ["content.js"],
       "run_at": "document_end"
     }

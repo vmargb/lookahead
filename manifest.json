@@ -1,0 +1,52 @@
+{
+  "manifest_version": 3,
+  "name": "Look Ahead",
+  "version": "1.0",
+  "description": "Automatically open the best search result for your query.",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "look-ahead@yourdomain.com",
+      "strict_min_version": "120.0"
+    }
+  },
+  "permissions": [
+    "activeTab",
+    "storage",
+    "scripting",
+    "tabs"
+  ],
+  "host_permissions": [
+    "https://duckduckgo.com/*"
+  ],
+  "background": {
+    "scripts": ["background.js"]
+  },
+  "action": {
+    "default_title": "Look Ahead"
+  },
+  "omnibox": {
+    "keyword": "la"
+  },
+  "commands": {
+    "next-result": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+L"
+      },
+      "description": "Open the next best search result"
+    },
+    "previous-result": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+H",
+        "mac": "Ctrl+Shift+H"
+      },
+      "description": "Open the previous result"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://duckduckgo.com/*"],
+      "js": ["content.js"],
+      "run_at": "document_end"
+    }
+  ]
+}

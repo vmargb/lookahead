@@ -2,9 +2,9 @@ const urlParams = new URLSearchParams(window.location.search);
 const isExtensionSearch = urlParams.has('la'); // checks if 'la' prefix exists in query
 
 
-if (isExtensionSearch) { // Only run the extension's logic if the 'la' prefix is present
+if (isExtensionSearch) { // only run the extension's logic if the 'la' prefix is present
 // ===========================================
-// *** LOADING SCREEN ANIMATION STUFF HERE ***
+// *** LOADING SCREEN ANIMATION STUFF ***
 // ===========================================
   function showLoadingScreen() {
     const overlay = document.createElement('div');

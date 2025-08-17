@@ -32,12 +32,10 @@ Once a result tab is open (in Instant Mode), use:
 
 | Shortcut        | Action                        |
 |----------------|-------------------------------|
-| `Ctrl + ]`     | Next result                   |
-| `Ctrl + [`     | Previous result               |
+| `Alt + L`     | Next result                   |
+| `Alt + H`     | Previous result               |
 | `Esc` (in preview) | Close preview               |
 | `1`–`9`        | Jump to result by number      |
-
-> Customize shortcuts in `chrome://extensions/shortcuts`
 
 ---
 

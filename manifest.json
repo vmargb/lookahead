@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Look Ahead",
+  "name": "Lookahead",
   "version": "1.0",
   "description": "Automatically open the best search result for your query.",
   "icons": {
@@ -8,7 +8,7 @@
   },
   "browser_specific_settings": {
     "gecko": {
-      "id": "@look-ahead.vmargb",
+      "id": "@lookahead.vmargb",
       "strict_min_version": "120.0"
     }
   },

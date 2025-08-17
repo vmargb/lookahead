@@ -3,6 +3,9 @@
   "name": "Look Ahead",
   "version": "1.0",
   "description": "Automatically open the best search result for your query.",
+  "icons": {
+    "1": "icons/lookahead-logo.png"
+  },
   "browser_specific_settings": {
     "gecko": {
       "id": "@look-ahead.vmargb",
@@ -32,14 +35,13 @@
   "commands": {
     "next-result": {
       "suggested_key": {
-        "default": "Ctrl+Shift+L"
+        "default": "Alt+L"
       },
       "description": "Open the next best search result"
     },
     "previous-result": {
       "suggested_key": {
-        "default": "Ctrl+Shift+H",
-        "mac": "Ctrl+Shift+H"
+        "default": "Alt+H"
       },
       "description": "Open the previous result"
     }
@@ -49,6 +51,12 @@
       "matches": ["https://duckduckgo.com/*", "https://www.google.com/*"],
       "js": ["content.js"],
       "run_at": "document_end"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["preview.html"],
+      "matches": ["<all_urls>"]
     }
   ]
 }

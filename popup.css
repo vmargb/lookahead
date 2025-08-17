@@ -1,0 +1,154 @@
+body {
+  width: 320px;
+  padding: 16px;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  margin: 0;
+  background: #121212;
+  color: #e0e0e0;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.header h2 {
+  margin: 0;
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 18px;
+  letter-spacing: 0.5px;
+}
+
+.option-group, .shortcuts {
+  background: #1e1e1e;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 14px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.6);
+  transition: background 0.3s ease;
+}
+
+.option-group:hover, .shortcuts:hover {
+  background: #242424;
+}
+
+.option-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #bbb;
+  font-size: 14px;
+}
+
+select, input[type="number"] {
+  width: 100%;
+  padding: 10px 12px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  background: #2a2a2a;
+  color: #e0e0e0;
+  transition: all 0.2s ease;
+}
+
+select:focus, input[type="number"]:focus {
+  outline: none;
+  background: #333;
+  box-shadow: 0 0 0 2px #00bfa5;
+}
+
+.toggle-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8px;
+  color: #ccc;
+}
+
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 48px;
+  height: 26px;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: #444;
+  transition: 0.4s;
+  border-radius: 26px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 20px;
+  width: 20px;
+  left: 3px;
+  bottom: 3px;
+  background-color: #121212;
+  transition: 0.4s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: #00bfa5;
+  box-shadow: 0 0 8px #00bfa5aa;
+}
+
+input:checked + .slider:before {
+  transform: translateX(22px);
+}
+
+.number-input-container {
+  margin-top: 12px;
+  opacity: 0.5;
+  transition: opacity 0.3s ease;
+}
+
+.number-input-container.enabled {
+  opacity: 1;
+}
+
+.shortcuts h3 {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  color: #aaa;
+  font-weight: 500;
+  border-bottom: 1px solid #333;
+  padding-bottom: 6px;
+}
+
+.shortcut-item {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-size: 13px;
+  color: #ccc;
+}
+
+.key-combo {
+  background: #2f2f2f;
+  padding: 3px 6px;
+  border-radius: 6px;
+  font-family: monospace;
+  font-size: 12px;
+  color: #00bfa5;
+  box-shadow: 0 0 6px rgba(0,191,165,0.3);
+}
+
+.description {
+  font-size: 12px;
+  color: #999;
+  margin-top: 6px;
+  line-height: 1.4;
+}

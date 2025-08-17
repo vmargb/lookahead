@@ -58,7 +58,6 @@ if (isExtensionSearch) { // Only run the extension's logic if the 'la' prefix is
         return;
       }
       // ======================================
-      // ======================================
       
       // gets first 10 search results using the selected search engine
       const results = Array.from(document.querySelectorAll(selector)).slice(0, 10);
@@ -94,7 +93,6 @@ if (isExtensionSearch) { // Only run the extension's logic if the 'la' prefix is
                  !hostname.includes('duckduckgo.com') && 
                  !hostname.includes('bing.com');
         });
-      // ======================================
       // ======================================
 
 

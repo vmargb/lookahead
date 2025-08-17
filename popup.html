@@ -2,71 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <style>
-    body {
-      width: 300px;
-      padding: 16px;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      margin: 0;
-    }
-    
-    .header {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-    
-    .header h2 {
-      margin: 0;
-      color: #333;
-      font-weight: 500;
-    }
-    
-    .option-group {
-      margin-bottom: 16px;
-    }
-    
-    .option-group label {
-      display: block;
-      margin-bottom: 8px;
-      font-weight: 500;
-      color: #555;
-    }
-    
-    select {
-      width: 100%;
-      padding: 8px;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      font-size: 14px;
-    }
-    
-    .shortcuts {
-      margin-top: 20px;
-      padding-top: 16px;
-      border-top: 1px solid #eee;
-    }
-    
-    .shortcuts h3 {
-      margin: 0 0 12px 0;
-      font-size: 14px;
-      color: #666;
-    }
-    
-    .shortcut-item {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 8px;
-      font-size: 12px;
-      color: #777;
-    }
-    
-    .key-combo {
-      background: #f5f5f5;
-      padding: 2px 6px;
-      border-radius: 3px;
-      font-family: monospace;
-    }
-  </style>
+  <link rel="stylesheet" href="popup.css">
 </head>
 <body>
   <div class="header">
@@ -82,15 +18,35 @@
     </select>
   </div>
   
+  <div class="option-group">
+    <label>Behavior Mode:</label>
+    <div class="toggle-container">
+      <span>Instant</span>
+      <label class="toggle-switch">
+        <input type="checkbox" id="preview-mode">
+        <span class="slider"></span>
+      </label>
+      <span>Preview</span>
+    </div>
+    <div class="description">
+      Toggle between instantly opening the best result or showing a preview to choose from
+    </div>
+    
+    <div class="number-input-container" id="preview-count-container">
+      <label for="preview-count">Number of results to preview:</label>
+      <input type="number" id="preview-count" min="2" max="8" value="4">
+    </div>
+  </div>
+  
   <div class="shortcuts">
     <h3>Keyboard Shortcuts</h3>
     <div class="shortcut-item">
       <span>Next Result:</span>
-      <span class="key-combo">Ctrl+Shift+L</span>
+      <span class="key-combo">Alt+L</span>
     </div>
     <div class="shortcut-item">
       <span>Previous Result:</span>
-      <span class="key-combo">Ctrl+Shift+H</span>
+      <span class="key-combo">Alt+H</span>
     </div>
   </div>
   

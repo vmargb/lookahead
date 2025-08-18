@@ -4,7 +4,7 @@
   "version": "1.0",
   "description": "Automatically open the best search result for your query.",
   "icons": {
-    "1": "icons/lookahead-logo.png"
+    "48": "icons/lookahead-logo.png"
   },
   "browser_specific_settings": {
     "gecko": {
@@ -23,7 +23,8 @@
     "https://www.google.com/*"
   ],
   "background": {
-    "scripts": ["background.js"]
+    "scripts": ["background.js"],
+    "type": "module"
   },
   "action": {
     "default_title": "Look Ahead",

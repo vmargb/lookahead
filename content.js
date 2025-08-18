@@ -1,3 +1,12 @@
+// ===========================
+// CONTENT.JS (instant mode only)
+// ===========================
+// The job of this script is just to receive
+// the message from background.js and then
+// scrape the page such as the URL and title,
+// then sends the result back to background.js.
+// ======================================
+
 const urlParams = new URLSearchParams(window.location.search);
 const isExtensionSearch = urlParams.has('la'); // checks if 'la' prefix exists in query
 
@@ -36,6 +45,9 @@ if (isExtensionSearch) { // only run the extension's logic if the 'la' prefix is
 
   showLoadingScreen();
 
+  // ===========================
+  // *** MESSAGE LISTENER ***
+  // ===========================
   chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === "findBestResult") {
       const query = request.query.toLowerCase();
@@ -94,70 +106,8 @@ if (isExtensionSearch) { // only run the extension's logic if the 'la' prefix is
                  !hostname.includes('bing.com');
         });
       // ======================================
-
-
-
-      // ======================================
-      // *** SMART SCORING LOGIC :D ***
-      // ======================================
-      function scoreResult(title, url, queryWords) {
-        let score = 0;
-        const normalizedTitle = title.toLowerCase();
-        const normalizedUrl = url.toString().toLowerCase();
-        const seenWords = new Set(); // prevent double-counting with a set
-
-        
-        // step 1: standard Keyword Scoring with weighted logic
-        queryWords.forEach(word => {
-          if (seenWords.has(word)) return;
-          const regex = new RegExp(`\\b${word}\\b`, 'i');
-          const inTitle = regex.test(normalizedTitle);
-          const inUrl = regex.test(normalizedUrl);
-          if (inTitle || inUrl) {
-            score += inTitle ? 2 : 1;
-            seenWords.add(word);
-          }
-        });
-        
-        // step 2: "Domain Bonus" - for official sites
-        try {
-          const hostname = new URL(url).hostname;
-          // get the core domain name (e.g., "twitter" from "www.twitter.com")
-          const coreDomain = hostname.replace(/^www\./, '').split('.')[0];
-          
-          if (queryWords.includes(coreDomain)) {
-            score += 10; // the domain boost here
-          }
-        } catch (e) {
-          // ignore invalid URLs
-        }
-
-        // step 3: Tie-breaker: Penalize long and complex URLs
-        score -= url.length * 0.01;
-        return score;
-      }
-
-
-
-      // =================================
-      // ** SCORE AND SORT RESULTS **
-      // =================================
-      // Goes through each result and scores it
-      // using the scoreResult function.
-      // Sorts the results by score in descending order.
-      // saves the scores as a "leaderboard" to be
-      // cycled through in the background script.
-      // =================================
-      const scoredResults = extractedResults.map(({ url, title }) => {
-        const score = scoreResult(title, url, queryWords);
-        console.log(`URL: ${url}, Score: ${score.toFixed(2)}`);
-        return { url, title, score };
-      }).sort((a, b) => b.score - a.score);
-      
-      sendResponse({ 
-        results: scoredResults,
-        bestUrl: scoredResults[0]?.url || null 
-      });
+      // ** Send the raw, unscored results back **
+      sendResponse({ results: extractedResults });
     }
 
     return true;

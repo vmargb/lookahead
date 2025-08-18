@@ -1,3 +1,5 @@
+import { scoreAndSortResults } from './scoring.js';
+
 // ======================================
 // *** SEARCH ENGINE CONFIG stuff here ***
 // ======================================
@@ -52,17 +54,57 @@ async function getUserSettings() {
 // *** PREVIEW MODE HANDLER ***
 // ======================================
 function handlePreviewMode(query, selectedEngine, previewCount) {
-  const previewUrl = chrome.runtime.getURL(`preview.html?q=${encodeURIComponent(query)}&engine=${selectedEngine}&count=${previewCount}`);
-  
-  chrome.tabs.create({ url: previewUrl, active: true }, (tab) => {
-    previewTabId = tab.id;
+  const searchUrl = SEARCH_ENGINES[selectedEngine].url(query);
+
+  // create a temporary, inactive tab to scrape in the background (active: false)
+  chrome.tabs.create({ url: searchUrl, active: false }, (tempTab) => {
     
-    performSearch(query, selectedEngine, (results) => {
-      chrome.tabs.sendMessage(previewTabId, {
-        action: 'displayResults',
-        results: results
+    const tabUpdateListener = (tabId, changeInfo) => {
+      // wait for the temporary tab to finish loading
+      if (tabId !== tempTab.id || changeInfo.status !== 'complete') return;
+      
+      // send a message to content.js to get raw results
+      chrome.tabs.sendMessage(tempTab.id, { 
+        action: "findBestResult", 
+        query: query,
+        engine: selectedEngine
+      }, (response) => {
+        // now that we have the results, close the temporary tab
+        chrome.tabs.remove(tempTab.id);
+
+        if (chrome.runtime.lastError || !response?.results) {
+          console.error("Could not fetch preview results.", chrome.runtime.lastError?.message);
+          return;
+        }
+
+        // score and sort the results
+        const queryWords = query.toLowerCase().split(/\s+/).filter(Boolean);
+        const scoredResults = scoreAndSortResults(response.results, queryWords);
+
+        // add results to preview.html tab
+        const previewUrl = chrome.runtime.getURL(`preview.html?q=${encodeURIComponent(query)}&engine=${selectedEngine}&count=${previewCount}`);
+        chrome.tabs.create({ url: previewUrl, active: true }, (previewTab) => {
+          previewTabId = previewTab.id;
+
+          // wait for preview.html to be ready to receive the results
+          const previewListener = (pTabId, pChangeInfo) => {
+            if (pTabId === previewTab.id && pChangeInfo.status === 'complete') {
+              chrome.tabs.sendMessage(previewTab.id, {
+                action: 'displayResults',
+                results: scoredResults
+              });
+              chrome.tabs.onUpdated.removeListener(previewListener); // clean up this listener
+            }
+          };
+          chrome.tabs.onUpdated.addListener(previewListener);
+        });
       });
-    });
+      
+      // Clean up the initial listener
+      chrome.tabs.onUpdated.removeListener(tabUpdateListener);
+    };
+    
+    chrome.tabs.onUpdated.addListener(tabUpdateListener);
   });
 }
 
@@ -82,15 +124,19 @@ function handleInstantMode(query, selectedEngine) {
       chrome.tabs.sendMessage(tab.id, { 
         action: "findBestResult", 
         query: query,
-        engine: selectedEngine 
-      }, (response) => {
+        engine: selectedEngine
+      }, (response) => { // response contains raw search results
         if (chrome.runtime.lastError) {
           console.error('Message failed:', chrome.runtime.lastError.message);
           return;
         }
         
         if (response?.results && response.results.length > 0) {
-          currentResults = response.results;
+          // ** score and sort the raw results here **
+          const queryWords = query.toLowerCase().split(/\s+/).filter(Boolean);
+          const scoredResults = scoreAndSortResults(response.results, queryWords);
+
+          currentResults = scoredResults;
           currentIndex = 0;
           chrome.tabs.update(tab.id, { url: currentResults[currentIndex].url });
         } else {
@@ -104,6 +150,7 @@ function handleInstantMode(query, selectedEngine) {
     chrome.tabs.onUpdated.addListener(tabUpdateListener);
   });
 }
+
 
 // ======================================
 // *** OMNIBOX INPUT HANDLER (main) ***
@@ -123,53 +170,6 @@ chrome.omnibox.onInputEntered.addListener(async (text) => {
     handleInstantMode(text, selectedEngine);
   }
 });
-
-
-
-// =====================================================================
-// *** ALL PREVIEW MODE LOGIC STUFF HERE ***
-// =====================================================================
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if (request.action === 'getPreviewResults') {
-    performSearch(request.query, request.engine, (results) => {
-      sendResponse({ results });
-    });
-    return true; // keep message channel open for async response
-  }
-});
-
-function performSearch(query, engine, callback) {
-  const searchUrl = SEARCH_ENGINES[engine].url(query);
-  // create a background tab to fetch results
-  chrome.tabs.create({ url: searchUrl, active: false }, (tab) => {
-    const tabUpdateListener = (tabId, changeInfo, updatedTab) => {
-      if (tabId !== tab.id || changeInfo.status !== 'complete') return;
-      
-      chrome.tabs.sendMessage(tab.id, { 
-        action: "findBestResult", 
-        query: query,
-        engine: engine 
-      }, (response) => {
-        chrome.tabs.remove(tab.id); // close the background tab
-        
-        if (chrome.runtime.lastError) {
-          console.error('Message failed:', chrome.runtime.lastError.message);
-          callback([]);
-          return;
-        }
-        
-        callback(response?.results || []);
-      });
-      
-      chrome.tabs.onUpdated.removeListener(tabUpdateListener);
-    };
-    
-    chrome.tabs.onUpdated.addListener(tabUpdateListener);
-  });
-}
-// ==================================================================
-// *** END OF PREVIEW MODE ***
-// ==================================================================
 
 
 // ======================================

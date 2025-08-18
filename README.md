@@ -1,6 +1,6 @@
 # 🔍 Look Ahead
 
-A fast, keyboard-friendly browser extension that helps you **navigate search results smarter and faster** — directly from the address bar.
+A fast, keyboard-friendly browser extension that intelligently **navigates search results while you sit back and relax** — directly from the address bar.
 
 > No more clutter. Get to the best result in one go.
 
@@ -13,11 +13,11 @@ A fast, keyboard-friendly browser extension that helps you **navigate search res
 ✨ **Two Smart Modes to Match Your Workflow:**
 
 ### 1. **Instant Mode (Default)**
-- Type your query in the address bar.
+- Type your query in the address bar with the prefix: `la`.
 - Instantly opens the **top-ranked result** from DuckDuckGo, Google, or Bing.
 - Skips the search engine page entirely — go straight to the best answer.
 
-### 2. **Preview Mode (Power User Favorite)**
+### 2. **Preview Mode**
 - See the **top N results** in a clean, minimal preview page.
 - Navigate with **keyboard arrows**, **number keys**, or mouse.
 - Choose the perfect result without clutter.

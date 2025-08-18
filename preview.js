@@ -39,10 +39,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
 
 // ======================================
+// *** INJECTS RESULT HEADER HERE **
+// ======================================
 // Render Search Results in UI
 // Populates the results container with 
 // ranked, scored results. Shows fallback 
-// if no results are available.
+// response if no results are available.
 // ======================================
 function displayResults() {
   const container = document.getElementById('results-container');
@@ -59,9 +61,11 @@ function displayResults() {
   
   container.innerHTML = results.map((result, index) => `
     <a href="${result.url}" class="result-item" data-index="${index}" target="_blank">
-      <div class="result-rank">${index + 1}</div>
       <div class="result-score">${result.score.toFixed(1)}</div>
-      <div class="result-title">${escapeHtml(result.title)}</div>
+      <div class="result-header">
+        <span class="result-rank">${index + 1}</span>
+        <div class="result-title">${escapeHtml(result.title)}</div>
+      </div>
       <div class="result-url">${result.url}</div>
     </a>
   `).join('');

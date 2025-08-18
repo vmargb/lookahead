@@ -1,6 +1,14 @@
 import { scoreAndSortResults } from './scoring.js';
 
 // ======================================
+// *** NOTES ***
+// ======================================
+// cycling not enabled by default in preview mode
+// only enabled after user selects a site in preview.html
+// preview.html needs to send a message back to background.js
+
+
+// ======================================
 // *** SEARCH ENGINE CONFIG stuff here ***
 // ======================================
 const SEARCH_ENGINES = {
@@ -23,9 +31,9 @@ const SEARCH_ENGINES = {
 // Storage for current search results
 // and current index for cycling & preview
 // ======================================
-let currentResults = [];
-let currentIndex = 0;
-let currentTabId = null;
+let currentResults = []; // scored results in order
+let currentIndex = 0; // current position
+let currentTabId = null; // only allow cycling in this tab
 let previewTabId = null;
 
 
@@ -202,6 +210,25 @@ chrome.commands.onCommand.addListener((command) => {
   });
 });
 
+
+// ===========================================
+// *** PREVIEW.JS LISTENER ***  
+// ===========================================
+// listens for a tab to picked in preview.JS
+// preview.js will send which tab was picked
+// back to us and the index of the tab so that
+// tab cycling can be enabled by updating the variables
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request.action === 'previewResultSelected') {
+    // now set the global variables to enable keyboard shortcuts.
+    currentResults = request.results;
+    currentIndex = request.selectedIndex;
+    currentTabId = sender.tab.id; // the ID of the tab that sent the message (the preview tab)
+
+    // manually navigate the tab to the chosen URL
+    chrome.tabs.update(currentTabId, { url: currentResults[currentIndex].url });
+  }
+});
 
 
 // ===========================================

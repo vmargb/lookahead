@@ -4,7 +4,8 @@
 // results from DuckDuckGo (or other engine).
 // Allows keyboard navigation and selection.
 // ======================================
-let results = [];
+let allResults = []; // the entire result list
+let displayedResults = []; // only the displayed results (1 to n)
 let selectedIndex = 0;
 
 
@@ -26,13 +27,13 @@ document.getElementById('query-display').textContent = `"${query}"`;
 
 
 // ======================================
-// Listen for Results from Background
-// Receives search results sent by the 
+// Listens for search results sent by the 
 // background script and renders them.
 // ======================================
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === 'displayResults') {
-    results = request.results.slice(0, count);
+    allResults = request.results; // complete list
+    displayedResults = allResults.slice(0, count); // 1 to n
     displayResults();
   }
 });
@@ -49,7 +50,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 function displayResults() {
   const container = document.getElementById('results-container');
   
-  if (results.length === 0) {
+  if (displayedResults.length === 0) {
     container.innerHTML = `
       <div class="no-results">
         <h2>No results found</h2>
@@ -59,7 +60,7 @@ function displayResults() {
     return;
   }
   
-  container.innerHTML = results.map((result, index) => `
+  container.innerHTML = displayedResults.map((result, index) => `
     <a href="${result.url}" class="result-item" data-index="${index}" target="_blank">
       <div class="result-score">${result.score.toFixed(1)}</div>
       <div class="result-header">
@@ -107,13 +108,23 @@ function updateSelection() {
 
 
 // ======================================
-// Handle Result Selection
+// *** ENABLE TAB CYCLING FOR ***
+// ***   PREVIEW MODE HERE    ***
+// ======================================
 // Opens the selected result URL in 
 // the current window (replaces popup).
+// Sends the results back to background.js
+// for tab cycling
 // ======================================
 function selectResult(index) {
-  if (results[index]) {
-    window.open(results[index].url, '_self');
+  if (displayedResults[index]) {
+    // send a message to background.js
+    // background.js will handle changing URL
+    chrome.runtime.sendMessage({
+      action: 'previewResultSelected',
+      results: allResults, // Send the FULL list for the leaderboard
+      selectedIndex: index   // Send the index chosen in preview
+    });
   }
 }
 
@@ -146,7 +157,7 @@ document.addEventListener('keydown', (e) => {
       break;
     case 'ArrowDown':
       e.preventDefault();
-      selectedIndex = Math.min(results.length - 1, selectedIndex + 1);
+      selectedIndex = Math.min(displayedResults.length - 1, selectedIndex + 1);
       updateSelection();
       break;
     case 'Enter':
@@ -159,7 +170,7 @@ document.addEventListener('keydown', (e) => {
     default:
       // Quick-select with number keys (1 to 9)
       const num = parseInt(e.key);
-      if (num >= 1 && num <= results.length) {
+      if (num >= 1 && num <= displayedResults.length) {
         e.preventDefault();
         selectedIndex = num - 1;
         selectResult(selectedIndex);
@@ -167,18 +178,3 @@ document.addEventListener('keydown', (e) => {
       break;
   }
 });
-
-
-// ======================================
-// Request Initial Search Results
-// Asks background script to fetch and 
-// return top results for the query.
-// Triggers display upon receipt.
-// ======================================
-chrome.runtime.sendMessage({ 
-  action: 'getPreviewResults', 
-  query, 
-  engine, 
-  count 
-});
-// ======================================

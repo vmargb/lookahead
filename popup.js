@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', async () => {
   const searchEngineSelect = document.getElementById('search-engine');
+  const useOmniboxKeyword = document.getElementById('use-omnibox-keyword');
   const previewModeToggle = document.getElementById('preview-mode');
   const previewCountInput = document.getElementById('preview-count');
   const previewCountContainer = document.getElementById('preview-count-container');
@@ -8,11 +9,18 @@ document.addEventListener('DOMContentLoaded', async () => {
   const result = await chrome.storage.sync.get([
     'searchEngine', 
     'previewMode', 
-    'previewCount'
+    'previewCount',
+    'useOmniboxKeyword'
   ]);
   
   if (result.searchEngine) {
     searchEngineSelect.value = result.searchEngine;
+  }
+
+  if (result.useOmniboxKeyword !== undefined) {
+    useOmniboxKeyword.checked = result.useOmniboxKeyword;
+  } else {
+    useOmniboxKeyword.checked = true; // default enabled
   }
   
   if (result.previewMode !== undefined) {
@@ -25,7 +33,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     previewCountInput.value = 4; // default
   }
   
-  // Update preview count container visibility
+  // update preview count container visibility
   function updatePreviewCountVisibility() {
     if (previewModeToggle.checked) {
       previewCountContainer.classList.add('enabled');
@@ -41,6 +49,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     await chrome.storage.sync.set({
       searchEngine: searchEngineSelect.value
     });
+  });
+
+  // checked = true means "Manual Mode" is ON.
+  // checked = false means "Automatic Mode" is ON.
+  useOmniboxKeyword.addEventListener('change', () => {
+    chrome.storage.sync.set({ useOmniboxKeyword: useOmniboxKeyword.checked });
   });
   
   previewModeToggle.addEventListener('change', async () => {

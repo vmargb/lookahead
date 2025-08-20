@@ -1,20 +1,18 @@
 // ===========================
-// CONTENT.JS (instant mode only)
+// CONTENT.JS
 // ===========================
-// The job of this script is just to receive
-// the message from background.js and then
-// scrape the page such as the URL and title,
-// then sends the result back to background.js.
+// This script's only job is to show a loading screen,
+// wait for a message from background.js, scrape the page
+// for results, and send that raw data back.
 // ======================================
 
 const urlParams = new URLSearchParams(window.location.search);
-const isExtensionSearch = urlParams.has('la'); // checks if 'la' prefix exists in query
+const isExtensionSearch = urlParams.has('la');
 
-
-if (isExtensionSearch) { // only run the extension's logic if the 'la' prefix is present
-// ===========================================
-// *** LOADING SCREEN ANIMATION STUFF ***
-// ===========================================
+if (isExtensionSearch) {
+  // ===========================================
+  // *** LOADING SCREEN ***
+  // ===========================================
   function showLoadingScreen() {
     const overlay = document.createElement('div');
     overlay.id = 'look-ahead-overlay';
@@ -27,15 +25,13 @@ if (isExtensionSearch) { // only run the extension's logic if the 'la' prefix is
         position: fixed; top: 0; left: 0; width: 100%; height: 100%;
         background-color: #1a1a1a; color: #e0e0e0;
         display: flex; justify-content: center; align-items: center;
-        z-index: 9999; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        opacity: 0; animation: fadeIn 0.3s ease-in forwards;
+        z-index: 9999;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        opacity: 1;
       }
       #look-ahead-overlay h1 {
-        font-size: 2.5rem; font-weight: 300;
-        animation: pulse 1.5s infinite ease-in-out;
+        font-size: 2.5rem; font-weight: 300; margin: 0;
       }
-      @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-      @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
     `;
 
     document.head.appendChild(styles);
@@ -50,14 +46,9 @@ if (isExtensionSearch) { // only run the extension's logic if the 'la' prefix is
   // ===========================
   chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === "findBestResult") {
-      const query = request.query.toLowerCase();
+      // engine is needed to know which page selectors to use.
       const engine = request.engine || 'duckduckgo';
-      const queryWords = query.split(/\s+/).filter(Boolean);
 
-
-      // ===================================
-      // *** ENGINE SELECTOR ***
-      // ==================================
       const SELECTORS = {
         duckduckgo: 'a[data-testid="result-title-a"]',
         google: 'h3 a, a h3',
@@ -69,9 +60,7 @@ if (isExtensionSearch) { // only run the extension's logic if the 'la' prefix is
         sendResponse({ results: [] });
         return;
       }
-      // ======================================
       
-      // gets first 10 search results using the selected search engine
       const results = Array.from(document.querySelectorAll(selector)).slice(0, 10);
 
       // ======================================
@@ -87,7 +76,6 @@ if (isExtensionSearch) { // only run the extension's logic if the 'la' prefix is
         .map(a => {
           let url, title;
           if (engine === 'google') {
-            // google can have the link as the parent or child
             url = a.href || a.parentElement?.href;
             title = a.innerText || a.textContent || '';
           } else {
@@ -98,15 +86,13 @@ if (isExtensionSearch) { // only run the extension's logic if the 'la' prefix is
         })
         .filter(({ url, title }) => {
           if (!url || !title) return false;
-          // filter out search engine URLs and ads
-          // so they don't pollute the results
           const hostname = new URL(url).hostname;
           return !hostname.includes('google.com') && 
                  !hostname.includes('duckduckgo.com') && 
                  !hostname.includes('bing.com');
         });
       // ======================================
-      // ** Send the raw, unscored results back **
+      // ** send the raw, unscored results back **
       sendResponse({ results: extractedResults });
     }
 

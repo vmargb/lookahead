@@ -16,7 +16,9 @@
     "activeTab",
     "storage",
     "scripting",
-    "tabs"
+    "tabs",
+    "declarativeNetRequest",
+    "declarativeNetRequestWithHostAccess"
   ],
   "host_permissions": [
     "https://duckduckgo.com/*",
@@ -27,6 +29,9 @@
     "type": "module"
   },
   "action": {
+    "default_icon": {
+      "48": "icons/lookahead-logo.png"
+    },
     "default_title": "Look Ahead",
     "default_popup": "popup.html"
   },

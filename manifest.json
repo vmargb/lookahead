@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Lookahead",
-  "version": "1.1",
+  "version": "1.2",
   "description": "Automatically open the best search result for your query.",
   "icons": {
     "48": "icons/lookahead-logo.png"
@@ -41,26 +41,29 @@
   "commands": {
     "next-result": {
       "suggested_key": {
-        "default": "Alt+L"
+        "default": "Shift+Alt+L"
       },
       "description": "Open the next best search result"
     },
     "previous-result": {
       "suggested_key": {
-        "default": "Alt+H"
+        "default": "Shift+Alt+O"
       },
       "description": "Open the previous result"
     },
     "show-mini-popup": {
       "suggested_key": {
-        "default": "Alt+P"
+        "default": "Shift+Alt+P"
       },
       "description": "Show mini popup with all results"
     }
   },
   "content_scripts": [
     {
-      "matches": ["https://duckduckgo.com/*", "https://www.google.com/*"],
+      "matches": [
+        "https://duckduckgo.com/*",
+        "https://www.google.com/*"
+      ],
       "js": ["content.js"],
       "run_at": "document_end"
     },
@@ -73,7 +76,7 @@
   ],
   "web_accessible_resources": [
     {
-      "resources": ["preview.html", "mini-popup.html"],
+      "resources": ["preview.html", "mini-popup.css"],
       "matches": ["<all_urls>"]
     }
   ]

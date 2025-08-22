@@ -9,8 +9,7 @@
 export function extractResults(doc, engine) {
   const SELECTORS = {
     duckduckgo: 'a[data-testid="result-title-a"]',
-    google: 'h3 a, a h3',
-    bing: 'h2 a'
+    google: 'h3 a, a h3'
   };
 
   const selector = SELECTORS[engine];
@@ -21,7 +20,6 @@ export function extractResults(doc, engine) {
   return results
     .map(a => {
       let url, title;
-
       if (engine === 'google') {
         // Handle Google's nested or parent-linked structure
         url = a.href || a.parentElement?.href;

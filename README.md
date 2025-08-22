@@ -10,7 +10,7 @@ A fast, keyboard-friendly browser extension that intelligently **navigates searc
 
 ## 🚀 Features
 
-✨ **Three Smart features to Match Your Workflow:**
+✨ **Smart features to Match Your Workflow:**
 
 ### 1. **Automatic Mode (New!)**
 - Just search normally on **DuckDuckGo or Google**.
@@ -26,7 +26,13 @@ A fast, keyboard-friendly browser extension that intelligently **navigates searc
 - Navigate with **keyboard arrows**, **number keys**, or mouse.
 - Choose the perfect result without clutter.
 
+### 4. **Floating Results**
+- See the top N results in a floating window.
+- Navigate with **keyboard arrows**, **number keys**, or mouse.
+- Choose the perfect result without clutter.
+
 🎯 Powered by a simple and minimal scoring algorithm that evaluates relevance, domain quality, and title match.
+
 
 ---
 
@@ -36,8 +42,9 @@ Once a result tab is open (in Instant Mode), use:
 
 | Shortcut        | Action                        |
 |----------------|-------------------------------|
-| `Alt + L`     | Next result                   |
-| `Alt + H`     | Previous result               |
+| `Shift+Alt+L`     | Next result                   |
+| `Shift+Alt+O`     | Previous result               |
+| `Shift+Alt+P`     | Show floating results         |
 | `Esc` (in preview) | Close preview               |
 | `1`–`9`        | Jump to result by number      |
 
@@ -47,7 +54,7 @@ Once a result tab is open (in Instant Mode), use:
 
 Synced across devices via your browser profile:
 
-- **Search Engine**: Choose DuckDuckGo, Google, or Bing
+- **Search Engine**: Choose DuckDuckGo, Google, or Qwant
 - **Navigation Mode**: Toggle between *Instant* and *Preview* mode
 - **Preview Count**: Set how many results to show (default: 4)
 

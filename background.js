@@ -38,20 +38,6 @@ const AUTO_MODE_RULES = [
       regexFilter: "^https://duckduckgo\\.com/(\\?[^#]*)(?<![?&]la=1)(?=$|#)",
       resourceTypes: ["main_frame"]
     }
-  },
-  {
-    id: 3,
-    priority: 1,
-    action: {
-      type: "redirect",
-      redirect: {
-        regexSubstitution: "https://www.bing.com/search\\1&la=1"
-      }
-    },
-    condition: {
-      regexFilter: "^https://www\\.bing\\.com/search(\\?[^#]*)(?<![?&]la=1)(?=$|#)",
-      resourceTypes: ["main_frame"]
-    }
   }
 ];
 
@@ -74,13 +60,6 @@ const SEARCH_ENGINES = {
       return base + '&la=1';
     },
     name: 'Google'
-  },
-  bing: {
-    url: (query) => {
-      const base = `https://www.bing.com/search?q=${encodeURIComponent(query)}`;
-      return base + '&la=1';
-    },
-    name: 'Bing'
   }
 };
 
@@ -388,9 +367,9 @@ chrome.commands.onCommand.addListener((command) => {
       // tab was closed, reset
       currentResults = [];
       currentTabId = null;
+      currentIndex = 0;
       return;
     }
-    
     if (command === 'next-result') {
       currentIndex = (currentIndex + 1) % currentResults.length;
       chrome.tabs.update(currentTabId, { url: currentResults[currentIndex].url });
@@ -406,6 +385,7 @@ chrome.commands.onCommand.addListener((command) => {
     }
   });
 });
+
 
 
 // ===========================================

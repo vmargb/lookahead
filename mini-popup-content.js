@@ -127,9 +127,10 @@ class LookaheadMiniPopup {
   }
 }
 
+// Global instance
 window.lookaheadMiniPopup = new LookaheadMiniPopup();
 
-// listen for messages from background script (similar to content.js)
+// Listen for messages from background script
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === 'showMiniPopup') {
     window.lookaheadMiniPopup.show(request.results, request.currentIndex);

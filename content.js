@@ -51,8 +51,7 @@ if (isExtensionSearch) {
 
       const SELECTORS = {
         duckduckgo: 'a[data-testid="result-title-a"]',
-        google: 'h3 a, a h3',
-        bing: 'h2 a'
+        google: 'h3 a, a h3'
       };
 
       const selector = SELECTORS[engine];
@@ -89,7 +88,7 @@ if (isExtensionSearch) {
           const hostname = new URL(url).hostname;
           return !hostname.includes('google.com') && 
                  !hostname.includes('duckduckgo.com') && 
-                 !hostname.includes('bing.com');
+                 !hostname.includes('qwant.com');
         });
       // ======================================
       // ** send the raw, unscored results back **

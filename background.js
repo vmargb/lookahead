@@ -397,10 +397,15 @@ chrome.commands.onCommand.addListener((command) => {
     } else if (command === 'previous-result') {
       currentIndex = (currentIndex - 1 + currentResults.length) % currentResults.length;
       chrome.tabs.update(currentTabId, { url: currentResults[currentIndex].url });
+    } else if (command === 'show-mini-popup') {
+      chrome.tabs.sendMessage(currentTabId, {
+        action: 'showMiniPopup',
+        results: currentResults,
+        currentIndex: currentIndex
+      });
     }
   });
 });
-
 
 
 // ===========================================

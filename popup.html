@@ -3,6 +3,30 @@
 <head>
   <meta charset="utf-8">
   <link rel="stylesheet" href="popup.css">
+  <style>
+    .support-section {
+      margin-top: 20px;
+      padding: 12px;
+      text-align: center;
+      font-size: 14px;
+      color: #555;
+      border-top: 1px solid #eee;
+    }
+    .support-link {
+      color: #ff5f5f;
+      text-decoration: none;
+      font-weight: 500;
+    }
+    .support-link:hover {
+      text-decoration: underline;
+    }
+    .support-icon {
+      vertical-align: middle;
+      margin-right: 4px;
+      width: 16px;
+      height: 16px;
+    }
+  </style>
 </head>
 <body>
   <div class="header">
@@ -44,7 +68,7 @@
       <span>Preview</span>
     </div>
     <div class="description">
-      Toggle between instantly opening the best result or showing a preview to choose from
+      Instantly open the best result or show a preview
     </div>
     
     <div class="number-input-container" id="preview-count-container">
@@ -63,6 +87,12 @@
       <span>Previous Result:</span>
       <span class="key-combo">Alt+H</span>
     </div>
+  </div>
+
+  <!-- Support Section -->
+  <div class="support-section">
+    <img src="./icons/ko-fi.png" alt="Ko-fi logo" class="support-icon">
+    <a href="https://ko-fi.com/vmargb" target="_blank" class="support-link">Buy me a coffee</a>
   </div>
   
   <script src="popup.js"></script>

@@ -10,14 +10,18 @@ A fast, keyboard-friendly browser extension that intelligently **navigates searc
 
 ## 🚀 Features
 
-✨ **Two Smart Modes to Match Your Workflow:**
+✨ **Three Smart features to Match Your Workflow:**
 
-### 1. **Instant Mode (Default)**
-- Type your query in the address bar with the prefix: `la`.
-- Instantly opens the **top-ranked result** from DuckDuckGo, Google, or Bing.
-- Skips the search engine page entirely — go straight to the best answer.
+### 1. **Automatic Mode (New!)**
+- Just search normally on **DuckDuckGo or Google**.
+- Look Ahead detects your search, analyzes results in the background, and **instantly redirects you to the best match**.
+- No need to type `la` or any prefix — it just works.
 
-### 2. **Preview Mode**
+### 2. **Instant Mode (Default)**
+- Use the `la` keyword(or automatic mode) in your address bar
+- Skips the search engine page entirely.
+
+### 3. **Preview Mode**
 - See the **top N results** in a clean, minimal preview page.
 - Navigate with **keyboard arrows**, **number keys**, or mouse.
 - Choose the perfect result without clutter.

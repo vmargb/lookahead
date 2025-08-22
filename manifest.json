@@ -50,6 +50,12 @@
         "default": "Alt+H"
       },
       "description": "Open the previous result"
+    },
+    "show-mini-popup": {
+      "suggested_key": {
+        "default": "Alt+P"
+      },
+      "description": "Show mini popup with all results"
     }
   },
   "content_scripts": [
@@ -57,11 +63,17 @@
       "matches": ["https://duckduckgo.com/*", "https://www.google.com/*"],
       "js": ["content.js"],
       "run_at": "document_end"
+    },
+    {
+      "matches": ["<all_urls>"],
+      "js": ["mini-popup-content.js"],
+      "css": ["mini-popup.css"],
+      "run_at": "document_end"
     }
   ],
   "web_accessible_resources": [
     {
-      "resources": ["preview.html"],
+      "resources": ["preview.html", "mini-popup.html"],
       "matches": ["<all_urls>"]
     }
   ]

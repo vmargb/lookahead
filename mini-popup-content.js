@@ -4,6 +4,7 @@ class LookaheadMiniPopup {
     this.results = [];
     this.selectedIndex = 0;
     this.isVisible = false;
+    this.keyHandler = null; // Store reference to handler
   }
 
   show(results, currentIndex = 0) {
@@ -23,6 +24,7 @@ class LookaheadMiniPopup {
       this.popup.remove();
       this.popup = null;
     }
+    this.removeKeyboardListeners(); // Clean up listeners
     this.isVisible = false;
   }
 
@@ -58,58 +60,111 @@ class LookaheadMiniPopup {
       item.addEventListener('click', () => this.selectResult(index));
     });
 
+    // Add click-outside-to-close functionality
+    this.popup.addEventListener('click', (e) => e.stopPropagation());
+
     document.body.appendChild(this.popup);
     this.setupKeyboardListeners();
+    
+    // Auto-focus the popup for better keyboard interaction
+    this.popup.focus();
   }
 
   setupKeyboardListeners() {
+    // Remove any existing listener first
+    this.removeKeyboardListeners();
+
     this.keyHandler = (e) => {
-      if (!this.isVisible) return;
+      if (!this.isVisible || !this.popup) return;
+
+      // Only handle events when popup is active and no input is focused
+      const activeElement = document.activeElement;
+      const isInputFocused = activeElement && (
+        activeElement.tagName === 'INPUT' || 
+        activeElement.tagName === 'TEXTAREA' || 
+        activeElement.isContentEditable
+      );
+      
+      if (isInputFocused) return;
+
+      // Prevent default behavior for our handled keys
+      const handledKeys = ['Escape', 'ArrowUp', 'ArrowDown', 'Enter', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+      if (handledKeys.includes(e.key)) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
 
       switch(e.key) {
         case 'Escape':
-          e.preventDefault();
           this.hide();
           break;
         case 'ArrowUp':
-          e.preventDefault();
           this.navigateUp();
           break;
         case 'ArrowDown':
-          e.preventDefault();
           this.navigateDown();
           break;
         case 'Enter':
-          e.preventDefault();
           this.selectResult(this.selectedIndex);
           break;
         default:
           const num = parseInt(e.key);
           if (num >= 1 && num <= this.results.length) {
-            e.preventDefault();
             this.selectResult(num - 1);
           }
           break;
       }
     };
 
-    document.addEventListener('keydown', this.keyHandler);
+    // Use capture phase to handle before other listeners
+    document.addEventListener('keydown', this.keyHandler, true);
+    
+    // Also add click-outside-to-close
+    this.documentClickHandler = (e) => {
+      if (this.isVisible && this.popup && !this.popup.contains(e.target)) {
+        this.hide();
+      }
+    };
+    document.addEventListener('click', this.documentClickHandler);
+  }
+
+  removeKeyboardListeners() {
+    if (this.keyHandler) {
+      document.removeEventListener('keydown', this.keyHandler, true);
+      this.keyHandler = null;
+    }
+    if (this.documentClickHandler) {
+      document.removeEventListener('click', this.documentClickHandler);
+      this.documentClickHandler = null;
+    }
   }
 
   navigateUp() {
-    this.selectedIndex = Math.max(0, this.selectedIndex - 1);
-    this.updateSelection();
+    if (this.selectedIndex > 0) {
+      this.selectedIndex--;
+      this.updateSelection();
+    }
   }
 
   navigateDown() {
-    this.selectedIndex = Math.min(this.results.length - 1, this.selectedIndex + 1);
-    this.updateSelection();
+    if (this.selectedIndex < this.results.length - 1) {
+      this.selectedIndex++;
+      this.updateSelection();
+    }
   }
 
   updateSelection() {
+    if (!this.popup) return;
+    
     this.popup.querySelectorAll('.popup-result-item').forEach((item, index) => {
       item.classList.toggle('selected', index === this.selectedIndex);
     });
+    
+    // Scroll selected item into view
+    const selectedItem = this.popup.querySelector('.popup-result-item.selected');
+    if (selectedItem) {
+      selectedItem.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    }
   }
 
   selectResult(index) {
@@ -127,8 +182,10 @@ class LookaheadMiniPopup {
   }
 }
 
-// Global instance
-window.lookaheadMiniPopup = new LookaheadMiniPopup();
+// Global instance - but check if it already exists
+if (!window.lookaheadMiniPopup) {
+  window.lookaheadMiniPopup = new LookaheadMiniPopup();
+}
 
 // Listen for messages from background script
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {

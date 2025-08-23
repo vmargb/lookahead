@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Lookahead",
-  "version": "1.2",
+  "version": "1.2.2",
   "description": "Automatically open the best search result for your query.",
   "icons": {
     "48": "icons/lookahead-logo.png"

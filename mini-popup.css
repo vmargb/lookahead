@@ -14,6 +14,8 @@
   color: #e0e0e0;
   overflow: hidden;
   animation: slideIn 0.2s ease-out;
+  outline: none;
+  user-select: none;
 }
 
 @keyframes slideIn {
@@ -34,6 +36,7 @@
   max-height: 400px;
   overflow-y: auto;
   padding: 8px;
+  scroll-behavior: smooth;
 }
 
 .popup-result-item {
@@ -52,6 +55,7 @@
 .popup-result-item.selected {
   background: rgba(35, 35, 50, 0.8);
   border-left-color: #6366f1;
+  transform: translateX(2px);
 }
 
 .result-number {

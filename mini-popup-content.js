@@ -74,6 +74,7 @@ class LookaheadMiniPopup {
     // Remove any existing listener first
     this.removeKeyboardListeners();
 
+    // key handling logic listener here!
     this.keyHandler = (e) => {
       if (!this.isVisible || !this.popup) return;
 
@@ -87,45 +88,65 @@ class LookaheadMiniPopup {
       
       if (isInputFocused) return;
 
-      // Prevent default behavior for our handled keys
-      const handledKeys = ['Escape', 'ArrowUp', 'ArrowDown', 'Enter', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+      // prevent default behaviour for number keys
+      const num = this.getNumberFromKeyEvent(e);
+      if (num !== null && num >= 1 && num <= this.results.length) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        this.selectResult(num - 1);
+        return;
+      }
+
+      // Prevent default behavior for other keys
+      const handledKeys = ['Escape', 'ArrowUp', 'ArrowDown', 'Enter'];
       if (handledKeys.includes(e.key)) {
         e.preventDefault();
         e.stopPropagation();
-      }
 
-      switch(e.key) {
-        case 'Escape':
-          this.hide();
-          break;
-        case 'ArrowUp':
-          this.navigateUp();
-          break;
-        case 'ArrowDown':
-          this.navigateDown();
-          break;
-        case 'Enter':
-          this.selectResult(this.selectedIndex);
-          break;
-        default:
-          const num = parseInt(e.key);
-          if (num >= 1 && num <= this.results.length) {
-            this.selectResult(num - 1);
-          }
-          break;
+        switch(e.key) {
+          case 'Escape':
+            this.hide();
+            break;
+          case 'ArrowUp':
+            this.navigateUp();
+            break;
+          case 'ArrowDown':
+            this.navigateDown();
+            break;
+          case 'Enter':
+            this.selectResult(this.selectedIndex);
+            break;
+        }
       }
     };
 
     // Use capture phase to handle before other listeners
     document.addEventListener('keydown', this.keyHandler, true);
     
-    // Also add click-outside-to-close
+    // close popup if i click somewhere outside the popup
     this.documentClickHandler = (e) => {
       if (this.isVisible && this.popup && !this.popup.contains(e.target)) {
         this.hide();
       }
     };
     document.addEventListener('click', this.documentClickHandler);
+  }
+
+  // enhanced number detection that handles various keyboard layouts and scenarios
+  // only necessary because num keys dont work on different machines
+  getNumberFromKeyEvent(e) {
+    // method 1: Check e.key (most reliable for modern browsers)
+    if (e.key && /^[1-9]$/.test(e.key)) { return parseInt(e.key); }
+    // method 2: Check e.code for physical key position (handles different layouts)
+    if (e.code) {
+      const codeToNumber = {
+        'Digit1': 1, 'Digit2': 2, 'Digit3': 3, 'Digit4': 4, 'Digit5': 5,
+        'Digit6': 6, 'Digit7': 7, 'Digit8': 8, 'Digit9': 9
+      };
+      if (codeToNumber[e.code]) { return codeToNumber[e.code]; }
+    }
+    return null;
   }
 
   removeKeyboardListeners() {

@@ -178,3 +178,11 @@ document.addEventListener('keydown', (e) => {
       break;
   }
 });
+
+
+// Listen for a focus command from the background script
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request.action === 'focusPage') {
+    window.focus();
+  }
+});

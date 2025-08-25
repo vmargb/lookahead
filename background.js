@@ -130,6 +130,30 @@ chrome.storage.onChanged.addListener((changes) => {
 });
 
 
+
+// ======================================
+// *** CREATE A NEW TAB OR UPDATE ***
+//      *** THE CURRENT TAB? ***
+// ======================================
+/**
+ * if we are on an empty tab then delete and return new tab
+ * but if we are on a used tab(like in zen) then create new
+ * @param {string} url - The URL to navigate to.
+ * returns either the created or updated tab.
+ */
+async function getOrCreateSearchTab(url, options = { active: true }) {
+  const [currentTab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  // update the current tab only if it's a blank "new tab" page and an active tab is requested.
+  if (currentTab?.url === 'about:newtab' && options.active !== false) {
+    await chrome.tabs.remove(currentTab.id); // remove the empty current tab
+    return chrome.tabs.create({ url, ...options }); // create a new tab with the URL
+  } else { // otherwise, create a new tab
+    return chrome.tabs.create({ url, ...options });
+  }
+}
+
+
+
 // ======================================
 // *** PREVIEW MODE HANDLER ***
 // ======================================
@@ -145,17 +169,16 @@ async function handlePreviewModeFromTab(tabId, query, engine, previewCount) {
       `preview.html?q=${encodeURIComponent(query)}&engine=${engine}&count=${previewCount}`
     );
 
-    chrome.tabs.create({ url: previewUrl, active: true }, previewTab => {
-      previewTabId = previewTab.id;
-      const listener = (pTabId, changeInfo) => {
-        if (pTabId === previewTab.id && changeInfo.status === "complete") {
-          chrome.tabs.sendMessage(previewTab.id, { action: "displayResults", results: scoredResults });
-          chrome.tabs.onUpdated.removeListener(listener);
-        }
-      };
-      chrome.tabs.onUpdated.addListener(listener);
-    });
+    // Use getOrCreateSearchTab to handle tab creation/replacement logic
+    const previewTab = await getOrCreateSearchTab(previewUrl, { active: true });
 
+    const listener = (pTabId, changeInfo) => {
+      if (pTabId === previewTab.id && changeInfo.status === "complete") {
+        chrome.tabs.sendMessage(previewTab.id, { action: "displayResults", results: scoredResults });
+        chrome.tabs.onUpdated.removeListener(listener);
+      }
+    };
+    chrome.tabs.onUpdated.addListener(listener);
     chrome.tabs.remove(tabId);
   } catch (err) {
     console.error("Error in handlePreviewModeFromTab:", err);
@@ -163,73 +186,78 @@ async function handlePreviewModeFromTab(tabId, query, engine, previewCount) {
 }
 
 
-// Handles preview in manual (omnibox keyword) mode
+// this version is for MANUAL (omnibox) mode searches
 async function handlePreviewModeManual(query, engine, previewCount) {
   const searchUrl = SEARCH_ENGINES[engine].url(query);
 
-  // Open a temporary search tab (inactive)
-  chrome.tabs.create({ url: searchUrl, active: false }, (tab) => {
-    const tabId = tab.id;
+  // Use getOrCreateSearchTab to handle tab creation/replacement logic
+  const newTab = await getOrCreateSearchTab(searchUrl, { active: true });
+  const targetTabId = newTab.id;
 
-    const listener = async (updatedTabId, changeInfo) => {
-      if (updatedTabId === tabId && changeInfo.status === 'complete') {
-        chrome.tabs.onUpdated.removeListener(listener);
+  const listener = async (updatedTabId, changeInfo) => {
+    if (updatedTabId === targetTabId && changeInfo.status === "complete") {
+      chrome.tabs.onUpdated.removeListener(listener);
 
-        // Now we have a valid tabId to fetch results from
-        handlePreviewModeFromTab(tabId, query, engine, previewCount);
-      }
-    };
-
-    chrome.tabs.onUpdated.addListener(listener);
-  });
+      // preview mode logic
+      handlePreviewModeFromTab(targetTabId, query, engine, previewCount);
+    }
+  };
+  chrome.tabs.onUpdated.addListener(listener);
 }
+
 
 
 
 // ======================================
 // *** INSTANT MODE HANDLER MANUAL ***
 // ======================================
-// This function is called when the user manually types "la" in the omnibox.
-// It opens a new tab with the search query and waits for the page to load.
-// Once the page is loaded, it sends a message to the content script to find the best result.
-// If a result is found, it updates the current tab with the result's URL.
-function handleInstantModeManual(query, selectedEngine) {
+/**
+ * This function is called when the user manually types "la" in the omnibox.
+ * It opens a new tab with the search query and waits for the page to load.
+ * Once the page is loaded, it sends a message to the content script to find the best result.
+ * If a result is found, it updates the current tab with the result's URL.
+ */
+async function handleInstantModeManual(query, selectedEngine) {
   const searchUrl = SEARCH_ENGINES[selectedEngine].url(query);
 
-  chrome.tabs.create({ url: searchUrl, active: true }, (tab) => {
-    currentTabId = tab.id;
-    
-    const tabUpdateListener = (tabId, changeInfo, updatedTab) => {
-      if (tabId !== tab.id || changeInfo.status !== 'complete') return;
-      
-      chrome.tabs.sendMessage(tab.id, { 
-        action: "findBestResult", 
-        engine: selectedEngine
-      }, (response) => { // response contains raw search results
-        if (chrome.runtime.lastError) {
-          console.error('Message failed:', chrome.runtime.lastError.message);
-          return;
-        }
-        
-        if (response?.results && response.results.length > 0) {
-          // ** score and sort the raw results here **
-          const queryWords = query.toLowerCase().split(/\s+/).filter(Boolean);
-          const scoredResults = scoreAndSortResults(response.results, queryWords);
+  // open a new tab with the search query
+  const tab = await getOrCreateSearchTab(searchUrl, { active: true });
+  const tabId = tab.id;
 
-          currentResults = scoredResults;
-          currentIndex = 0;
-          chrome.tabs.update(tab.id, { url: currentResults[currentIndex].url });
-        } else {
-          console.log('No suitable results found');
-        }
+  const tabUpdateListener = async (updatedTabId, changeInfo, updatedTab) => {
+    if (updatedTabId !== tabId || changeInfo.status !== "complete") return;
+
+    chrome.tabs.onUpdated.removeListener(tabUpdateListener);
+
+    try {
+      const response = await sendMessageWithRetry(tabId, {
+        action: "findBestResult",
+        engine: selectedEngine,
+        query: query
       });
-      
-      chrome.tabs.onUpdated.removeListener(tabUpdateListener);
-    };
-    
-    chrome.tabs.onUpdated.addListener(tabUpdateListener);
-  });
+
+      if (response?.results?.length) {
+        const queryWords = query.toLowerCase().split(/\s+/).filter(Boolean);
+        const scoredResults = scoreAndSortResults(response.results, queryWords);
+
+        currentTabId = tabId;
+        currentResults = scoredResults;
+        currentIndex = 0;
+
+        // redirect the same tab to the best result (just like auto mode)
+        chrome.tabs.update(tabId, { url: scoredResults[0].url });
+      } else {
+        console.log("No suitable results, leaving search page.");
+      }
+    } catch (error) {
+      console.error("Error during instant mode manual:", error);
+    }
+  };
+
+  chrome.tabs.onUpdated.addListener(tabUpdateListener);
 }
+
+
 
 
 
@@ -339,9 +367,13 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
 // and redirects the tab if all good.
 // ======================================
 chrome.omnibox.onInputEntered.addListener(async (text) => {
+  const { useOmniboxKeyword } = await chrome.storage.sync.get({ useOmniboxKeyword: true });
+  if (!useOmniboxKeyword) {
+    return; // do nothing since we are in automatic mode
+  }
+  
   const { selectedEngine, previewMode, previewCount } = await getUserSettings();
   if (previewMode) {
-    // Use the new helper for manual mode
     handlePreviewModeManual(text, selectedEngine, previewCount);
   } else {
     handleInstantModeManual(text, selectedEngine);

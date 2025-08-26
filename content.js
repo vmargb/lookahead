@@ -47,11 +47,12 @@ if (isExtensionSearch) {
   chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === "findBestResult") {
       // engine is needed to know which page selectors to use.
-      const engine = request.engine || 'duckduckgo';
+      const engine = request.engine || 'google';
 
       const SELECTORS = {
         duckduckgo: 'a[data-testid="result-title-a"]',
-        google: 'h3 a, a h3'
+        google: 'h3 a, a h3',
+        startpage: 'a.result-link'
       };
 
       const selector = SELECTORS[engine];
@@ -88,7 +89,7 @@ if (isExtensionSearch) {
           const hostname = new URL(url).hostname;
           return !hostname.includes('google.com') && 
                  !hostname.includes('duckduckgo.com') && 
-                 !hostname.includes('qwant.com');
+                 !hostname.includes('startpage.com');
         });
       // ======================================
       // ** send the raw, unscored results back **

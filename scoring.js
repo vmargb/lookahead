@@ -9,7 +9,8 @@
 export function extractResults(doc, engine) {
   const SELECTORS = {
     duckduckgo: 'a[data-testid="result-title-a"]',
-    google: 'h3 a, a h3'
+    google: 'h3 a, a h3',
+    startpage: 'a.result-link'
   };
 
   const selector = SELECTORS[engine];
@@ -51,7 +52,7 @@ export function extractResults(doc, engine) {
         // Block search engine self-links
         return !hostname.includes('google.com') &&
                !hostname.includes('duckduckgo.com') &&
-               !hostname.includes('bing.com');
+               !hostname.includes('startpage.com');
       } catch (e) {
         return false; // invalid URL
       }

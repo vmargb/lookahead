@@ -6,7 +6,7 @@ import { scoreAndSortResults } from './scoring.js';
 // cycling not enabled by default in preview mode
 // only enabled after user selects a site in preview.html
 // preview.html needs to send a message back to background.js
-
+// ======================================
 
 // Define the rules that will add the `la=1` parameter to searches in automatic mode
 const AUTO_MODE_RULES = [
@@ -38,6 +38,20 @@ const AUTO_MODE_RULES = [
       regexFilter: "^https://duckduckgo\\.com/(\\?[^#]*)(?<![?&]la=1)(?=$|#)",
       resourceTypes: ["main_frame"]
     }
+  },
+  {
+    id: 3,
+    priority: 1,
+    action: {
+      type: "redirect",
+      redirect: {
+        regexSubstitution: "https://www.startpage.com/sp/search\\1&la=1"
+      }
+    },
+    condition: {
+      regexFilter: "^https://www\\.startpage\\.com/sp/search(\\?[^#]*)(?<![?&]la=1)(?=$|#)",
+      resourceTypes: ["main_frame"]
+    }
   }
 ];
 
@@ -60,8 +74,16 @@ const SEARCH_ENGINES = {
       return base + '&la=1';
     },
     name: 'Google'
+  },
+  startpage: {
+    url: (query) => {
+      const base = `https://www.startpage.com/sp/search?q=${encodeURIComponent(query)}`;
+      return base + '&la=1';
+    },
+    name: 'Startpage'
   }
 };
+
 
 
 // ======================================
@@ -89,7 +111,7 @@ async function getUserSettings() {
   ]);
   
   return {
-    selectedEngine: settings.searchEngine || 'duckduckgo',
+    selectedEngine: settings.searchEngine || 'google',
     previewMode: settings.previewMode || false,
     previewCount: settings.previewCount || 4
   };
@@ -316,7 +338,7 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   // get users preferences first to see how to handle the search
   // like search engine, prievew mode or instant mode
   const { previewMode, selectedEngine, previewCount } = await getUserSettings();
-  const engine = Object.keys(SEARCH_ENGINES).find(k => url.hostname.includes(k)) || "duckduckgo";
+  const engine = Object.keys(SEARCH_ENGINES).find(k => url.hostname.includes(k)) || "google";
   const query = url.searchParams.get("q") || "";
 
 

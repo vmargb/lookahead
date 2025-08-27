@@ -314,6 +314,31 @@ async function sendMessageWithRetry(tabId, message, retries = 5, delay = 200) {
 // Decides whether to show a preview or go straight to the best result.
 // If "instant mode" is on, it finds the best result and redirects the tab to that page — all automatically.
 chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
+  // =================================================================
+  // *** CLEANUP LOGIC ***
+  // =================================================================
+  // ensures that we only remove the 'processed' lock from a 
+  // tab after it has successfully navigated
+  // to a *different* page (one without the 'la' prefix).
+  if (changeInfo.status === "complete" && tab.url) {
+    try {
+      const url = new URL(tab.url);
+      if (!url.searchParams.has("la")) {
+        // this is a navigation to a final, non-search page.
+        // clean up any pending search keys for this tabId.
+        for (const key of processedSearchTabs) {
+          if (key.startsWith(`${tabId}-`)) {
+            processedSearchTabs.delete(key);
+          }
+        }
+      }
+    } catch (e) {
+      // invalid URL, ignore.
+    }
+  }
+  // =================================================================
+
+
   const { useOmniboxKeyword } = await chrome.storage.sync.get({ useOmniboxKeyword: true });
   if (useOmniboxKeyword) { // check if "la" keyword enabled
     return; // if manual mode is ON, this listener should do nothing
@@ -323,24 +348,17 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   if (changeInfo.status !== "complete" || !tab.url || !tab.active) return;
 
   // only continue if URL has the keyword "la" in it
-  // even if user doesn't type 'la' it is injected into the
-  // url in "SEARCH_ENGINES" to allow automatic search to work
   const url = new URL(tab.url);
   if (!url.searchParams.has("la")) return;
 
-  // Prevents listener from activating twice on same tab
-  // after we make a change to the tab (e.g. redirect)
+  // prevents listener from activating twice on same tab
   const searchKey = `${tabId}-${url.searchParams.get("q") || ""}`;
   if (processedSearchTabs.has(searchKey)) return;
   processedSearchTabs.add(searchKey); // adds tab to seen
-  // This stops the extension from trying to redirect the same tab over and over. 
 
-  // get users preferences first to see how to handle the search
-  // like search engine, prievew mode or instant mode
   const { previewMode, selectedEngine, previewCount } = await getUserSettings();
   const engine = Object.keys(SEARCH_ENGINES).find(k => url.hostname.includes(k)) || "google";
   const query = url.searchParams.get("q") || "";
-
 
   // allows preview mode to work with automatic mode enabled
   // if user manually types "la" then it runs handlePreviewModeManual
@@ -364,16 +382,12 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
           currentResults = scoredResults;
           currentIndex = 0;
 
-          // Remove from processed set before navigation to allow future searches
-          processedSearchTabs.delete(searchKey);
           chrome.tabs.update(tabId, { url: scoredResults[0].url });
       } else {
           console.log("No suitable results, leaving search page.");
-          processedSearchTabs.delete(searchKey);
       }
   } catch (error) {
       console.error(error);
-      processedSearchTabs.delete(searchKey);
   }
 });
 

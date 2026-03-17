@@ -18,7 +18,7 @@ let selectedIndex = 0;
 // ======================================
 const urlParams = new URLSearchParams(window.location.search);
 const query = urlParams.get('q') || '';
-const engine = urlParams.get('engine') || 'duckduckog';
+const engine = urlParams.get('engine') || 'duckduckgo';
 const count = parseInt(urlParams.get('count')) || 4;
 
 

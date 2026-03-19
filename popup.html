@@ -3,30 +3,6 @@
 <head>
   <meta charset="utf-8">
   <link rel="stylesheet" href="popup.css">
-  <style>
-    .support-section {
-      margin-top: 20px;
-      padding: 12px;
-      text-align: center;
-      font-size: 14px;
-      color: #555;
-      border-top: 1px solid #eee;
-    }
-    .support-link {
-      color: #ff5f5f;
-      text-decoration: none;
-      font-weight: 500;
-    }
-    .support-link:hover {
-      text-decoration: underline;
-    }
-    .support-icon {
-      vertical-align: middle;
-      margin-right: 4px;
-      width: 16px;
-      height: 16px;
-    }
-  </style>
 </head>
 <body>
   <div class="header">
@@ -34,7 +10,7 @@
   </div>
   
   <div class="option-group">
-    <label for="search-engine">Search Engine:</label>
+    <label for="search-engine">Search Engine</label>
     <select id="search-engine">
       <option value="google">Google</option>
       <option value="startpage">Startpage</option>
@@ -43,7 +19,7 @@
   </div>
 
   <div class="option-group">
-    <label>Use Keyword:</label>
+    <label>Keyword Mode</label>
     <div class="toggle-container">
       <span>Off</span>
       <label class="toggle-switch">
@@ -52,13 +28,11 @@
       </label>
       <span>On</span>
     </div>
-    <div class="description">
-      Type 'la' prefix for searches
-    </div>
+    <div class="description">Type 'la' prefix for searches</div>
   </div>
   
   <div class="option-group">
-    <label>Behavior Mode:</label>
+    <label>Behaviour Mode</label>
     <div class="toggle-container">
       <span>Instant</span>
       <label class="toggle-switch">
@@ -67,12 +41,10 @@
       </label>
       <span>Preview</span>
     </div>
-    <div class="description">
-      Instantly open the best result or show a preview
-    </div>
+    <div class="description">Instantly open the best result or show a preview</div>
     
     <div class="number-input-container" id="preview-count-container">
-      <label for="preview-count">Number of results to preview:</label>
+      <label for="preview-count">Results to preview</label>
       <input type="number" id="preview-count" min="2" max="8" value="4">
     </div>
   </div>
@@ -80,22 +52,21 @@
   <div class="shortcuts">
     <h3>Keyboard Shortcuts</h3>
     <div class="shortcut-item">
-      <span>Next Result:</span>
+      <span>Next Result</span>
       <span class="key-combo">Shift+Alt+L</span>
     </div>
     <div class="shortcut-item">
-      <span>Previous Result:</span>
+      <span>Previous Result</span>
       <span class="key-combo">Shift+Alt+O</span>
     </div>
     <div class="shortcut-item">
-      <span>Floating Results:</span>
+      <span>Floating Results</span>
       <span class="key-combo">Shift+Alt+P</span>
     </div>
   </div>
 
-  <!-- Support Section -->
   <div class="support-section">
-    <img src="./icons/ko-fi.png" alt="Ko-fi logo" class="support-icon">
+    <img src="./icons/ko-fi.png" alt="Ko-fi" class="support-icon">
     <a href="https://ko-fi.com/vmargb" target="_blank" class="support-link">Buy me a coffee</a>
   </div>
   

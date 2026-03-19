@@ -1,10 +1,43 @@
+/* ===========================
+   SHARED DESIGN TOKENS
+   Used across popup, preview, and mini-popup
+   =========================== */
+:root {
+  --accent:        #00bfa5;
+  --accent-dim:    rgba(0, 191, 165, 0.15);
+  --accent-glow:   rgba(0, 191, 165, 0.35);
+  --accent-border: rgba(0, 191, 165, 0.25);
+
+  --bg:            #111111;
+  --bg-card:       #1c1c1c;
+  --bg-card-hover: #222222;
+  --bg-elevated:   #252525;
+
+  --border:        rgba(255, 255, 255, 0.07);
+  --border-strong: rgba(255, 255, 255, 0.12);
+
+  --text-primary:   #e0e0e0;
+  --text-secondary: #999999;
+  --text-muted:     #666666;
+  --text-link:      #00bfa5;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+
+  --shadow-card: 0 2px 12px rgba(0, 0, 0, 0.5);
+  --shadow-glow: 0 0 8px var(--accent-glow);
+}
+
+/* =========================== */
+
 body {
   width: 320px;
   padding: 16px;
-  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: "Geist", "SF Mono", ui-monospace, "Segoe UI", Roboto, sans-serif;
   margin: 0;
-  background: #121212;
-  color: #e0e0e0;
+  background: var(--bg);
+  color: var(--text-primary);
 }
 
 .header {
@@ -17,53 +50,65 @@ body {
   color: #ffffff;
   font-weight: 600;
   font-size: 18px;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.3px;
 }
 
-.option-group, .shortcuts {
-  background: #1e1e1e;
-  border-radius: 12px;
-  padding: 16px;
-  margin-bottom: 14px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.6);
-  transition: background 0.3s ease;
+.option-group,
+.shortcuts {
+  background: var(--bg-card);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  margin-bottom: 12px;
+  border: 1px solid var(--border);
+  transition: background 0.2s ease, border-color 0.2s ease;
 }
 
-.option-group:hover, .shortcuts:hover {
-  background: #242424;
+.option-group:hover,
+.shortcuts:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--border-strong);
 }
 
 .option-group label {
   display: block;
   margin-bottom: 8px;
   font-weight: 500;
-  color: #bbb;
-  font-size: 14px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-select, input[type="number"] {
+select,
+input[type="number"] {
   width: 100%;
-  padding: 10px 12px;
-  border: none;
-  border-radius: 8px;
+  padding: 9px 11px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
   font-size: 14px;
-  background: #2a2a2a;
-  color: #e0e0e0;
+  background: var(--bg-elevated);
+  color: var(--text-primary);
   transition: all 0.2s ease;
+  box-sizing: border-box;
 }
 
-select:focus, input[type="number"]:focus {
+select:focus,
+input[type="number"]:focus {
   outline: none;
-  background: #333;
-  box-shadow: 0 0 0 2px #00bfa5;
+  border-color: var(--accent-border);
+  box-shadow: 0 0 0 2px var(--accent-dim);
 }
 
+/* ===========================
+   TOGGLE SWITCH
+   =========================== */
 .toggle-container {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-top: 8px;
-  color: #ccc;
+  color: var(--text-secondary);
+  font-size: 13px;
 }
 
 .toggle-switch {
@@ -83,72 +128,122 @@ select:focus, input[type="number"]:focus {
   position: absolute;
   cursor: pointer;
   top: 0; left: 0; right: 0; bottom: 0;
-  background-color: #444;
-  transition: 0.4s;
+  background-color: var(--bg-elevated);
+  border: 1px solid var(--border-strong);
+  transition: 0.3s;
   border-radius: 26px;
 }
 
 .slider:before {
   position: absolute;
   content: "";
-  height: 20px;
-  width: 20px;
+  height: 18px;
+  width: 18px;
   left: 3px;
   bottom: 3px;
-  background-color: #121212;
-  transition: 0.4s;
+  background-color: var(--text-muted);
+  transition: 0.3s;
   border-radius: 50%;
 }
 
 input:checked + .slider {
-  background-color: #00bfa5;
-  box-shadow: 0 0 8px #00bfa5aa;
+  background-color: var(--accent);
+  border-color: var(--accent);
+  box-shadow: var(--shadow-glow);
 }
 
 input:checked + .slider:before {
   transform: translateX(22px);
+  background-color: #fff;
 }
 
+/* ===========================
+   PREVIEW COUNT INPUT
+   =========================== */
 .number-input-container {
   margin-top: 12px;
-  opacity: 0.5;
+  opacity: 0.4;
+  pointer-events: none;
   transition: opacity 0.3s ease;
 }
 
 .number-input-container.enabled {
   opacity: 1;
+  pointer-events: auto;
 }
 
+/* ===========================
+   SHORTCUTS
+   =========================== */
 .shortcuts h3 {
   margin: 0 0 12px 0;
-  font-size: 14px;
-  color: #aaa;
-  font-weight: 500;
-  border-bottom: 1px solid #333;
-  padding-bottom: 6px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 8px;
 }
 
 .shortcut-item {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   margin-bottom: 8px;
   font-size: 13px;
-  color: #ccc;
+  color: var(--text-secondary);
+}
+
+.shortcut-item:last-child {
+  margin-bottom: 0;
 }
 
 .key-combo {
-  background: #2f2f2f;
-  padding: 3px 6px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--accent-border);
+  padding: 3px 8px;
   border-radius: 6px;
   font-family: monospace;
-  font-size: 12px;
-  color: #00bfa5;
-  box-shadow: 0 0 6px rgba(0,191,165,0.3);
+  font-size: 11px;
+  color: var(--accent);
+  box-shadow: 0 0 6px var(--accent-dim);
 }
 
 .description {
   font-size: 12px;
-  color: #999;
+  color: var(--text-muted);
   margin-top: 6px;
-  line-height: 1.4;
+  line-height: 1.5;
+}
+
+/* ===========================
+   SUPPORT SECTION
+   =========================== */
+.support-section {
+  margin-top: 14px;
+  padding: 10px 12px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-muted);
+  border-top: 1px solid var(--border);
+}
+
+.support-link {
+  color: #ff6b6b;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.support-link:hover {
+  color: #ff8e8e;
+}
+
+.support-icon {
+  vertical-align: middle;
+  margin-right: 4px;
+  width: 14px;
+  height: 14px;
+  opacity: 0.9;
 }

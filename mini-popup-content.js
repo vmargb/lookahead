@@ -4,7 +4,8 @@ class LookaheadMiniPopup {
     this.results = [];
     this.selectedIndex = 0;
     this.isVisible = false;
-    this.keyHandler = null; // Store reference to handler
+    this.keyHandler = null;
+    this.documentClickHandler = null;
   }
 
   show(results, currentIndex = 0) {
@@ -12,7 +13,6 @@ class LookaheadMiniPopup {
       this.hide();
       return;
     }
-
     this.results = results;
     this.selectedIndex = currentIndex;
     this.createPopup();
@@ -28,67 +28,92 @@ class LookaheadMiniPopup {
     this.isVisible = false;
   }
 
+  // ======================================
+  // createPopup
+  // Builds the popup entirely with DOM
+  // methods — no innerHTML — to avoid
+  // unsafe assignment warnings and XSS.
+  // ======================================
   createPopup() {
     this.popup = document.createElement('div');
     this.popup.className = 'lookahead-mini-popup';
-    
-    this.popup.innerHTML = `
-      <div class="popup-header">
-        Quick Results
-        <button class="popup-close">×</button>
-      </div>
-      <div class="popup-results">
-        ${this.results.map((result, index) => `
-          <div class="popup-result-item ${index === this.selectedIndex ? 'selected' : ''}" data-index="${index}">
-            <div class="result-number">${index + 1}</div>
-            <div class="result-info">
-              <div class="result-mini-title">${this.escapeHtml(result.title)}</div>
-              <div class="result-mini-url">${result.url}</div>
-            </div>
-          </div>
-        `).join('')}
-      </div>
-      <div class="popup-hint">
-        Press 1-9 to select • Esc to close • ↑↓ to navigate
-      </div>
-    `;
+    this.popup.setAttribute('tabindex', '-1');
 
-    // Add event listeners
-    this.popup.querySelector('.popup-close').addEventListener('click', () => this.hide());
-    
-    this.popup.querySelectorAll('.popup-result-item').forEach((item, index) => {
+    // --- Header ---
+    const header = document.createElement('div');
+    header.className = 'popup-header';
+    header.textContent = 'Quick Results'; // safe
+
+    const closeBtn = document.createElement('button');
+    closeBtn.className = 'popup-close';
+    closeBtn.textContent = '×';
+    closeBtn.setAttribute('aria-label', 'Close');
+    closeBtn.addEventListener('click', () => this.hide());
+    header.appendChild(closeBtn);
+
+    // --- Results list ---
+    const resultsList = document.createElement('div');
+    resultsList.className = 'popup-results';
+
+    this.results.forEach((result, index) => {
+      const item = document.createElement('div');
+      item.className = 'popup-result-item' + (index === this.selectedIndex ? ' selected' : '');
+      item.dataset.index = String(index);
+
+      const numBadge = document.createElement('div');
+      numBadge.className = 'result-number';
+      numBadge.textContent = String(index + 1);
+
+      const info = document.createElement('div');
+      info.className = 'result-info';
+
+      const titleEl = document.createElement('div');
+      titleEl.className = 'result-mini-title';
+      titleEl.textContent = result.title; // textContent — XSS-safe
+
+      const urlEl = document.createElement('div');
+      urlEl.className = 'result-mini-url';
+      urlEl.textContent = result.url; // textContent — XSS-safe
+
+      info.append(titleEl, urlEl);
+      item.append(numBadge, info);
+
       item.addEventListener('click', () => this.selectResult(index));
+      resultsList.appendChild(item);
     });
 
-    // Add click-outside-to-close functionality
+    // --- Hint bar ---
+    const hint = document.createElement('div');
+    hint.className = 'popup-hint';
+    hint.textContent = 'Press 1-9 to select • Esc to close • ↑↓ to navigate';
+
+    // --- Assemble ---
+    this.popup.append(header, resultsList, hint);
+
+    // Stop clicks inside popup from bubbling to the document handler
     this.popup.addEventListener('click', (e) => e.stopPropagation());
 
     document.body.appendChild(this.popup);
     this.setupKeyboardListeners();
-    
-    // Auto-focus the popup for better keyboard interaction
     this.popup.focus();
   }
 
   setupKeyboardListeners() {
-    // Remove any existing listener first
     this.removeKeyboardListeners();
 
-    // key handling logic listener here!
     this.keyHandler = (e) => {
       if (!this.isVisible || !this.popup) return;
 
-      // Only handle events when popup is active and no input is focused
-      const activeElement = document.activeElement;
-      const isInputFocused = activeElement && (
-        activeElement.tagName === 'INPUT' || 
-        activeElement.tagName === 'TEXTAREA' || 
-        activeElement.isContentEditable
+      // Don't intercept when an input is focused
+      const active = document.activeElement;
+      const isInput = active && (
+        active.tagName === 'INPUT' ||
+        active.tagName === 'TEXTAREA' ||
+        active.isContentEditable
       );
-      
-      if (isInputFocused) return;
+      if (isInput) return;
 
-      // prevent default behaviour for number keys
+      // Number keys: jump to result
       const num = this.getNumberFromKeyEvent(e);
       if (num !== null && num >= 1 && num <= this.results.length) {
         e.preventDefault();
@@ -98,33 +123,22 @@ class LookaheadMiniPopup {
         return;
       }
 
-      // Prevent default behavior for other keys
-      const handledKeys = ['Escape', 'ArrowUp', 'ArrowDown', 'Enter'];
-      if (handledKeys.includes(e.key)) {
+      // Arrow / Enter / Escape
+      const handled = ['Escape', 'ArrowUp', 'ArrowDown', 'Enter'];
+      if (handled.includes(e.key)) {
         e.preventDefault();
         e.stopPropagation();
-
-        switch(e.key) {
-          case 'Escape':
-            this.hide();
-            break;
-          case 'ArrowUp':
-            this.navigateUp();
-            break;
-          case 'ArrowDown':
-            this.navigateDown();
-            break;
-          case 'Enter':
-            this.selectResult(this.selectedIndex);
-            break;
+        switch (e.key) {
+          case 'Escape':    this.hide();                       break;
+          case 'ArrowUp':   this.navigateUp();                 break;
+          case 'ArrowDown': this.navigateDown();               break;
+          case 'Enter':     this.selectResult(this.selectedIndex); break;
         }
       }
     };
 
-    // Use capture phase to handle before other listeners
     document.addEventListener('keydown', this.keyHandler, true);
-    
-    // close popup if i click somewhere outside the popup
+
     this.documentClickHandler = (e) => {
       if (this.isVisible && this.popup && !this.popup.contains(e.target)) {
         this.hide();
@@ -133,18 +147,15 @@ class LookaheadMiniPopup {
     document.addEventListener('click', this.documentClickHandler);
   }
 
-  // enhanced number detection that handles various keyboard layouts and scenarios
-  // only necessary because num keys dont work on different machines
+  // Enhanced number key detection for cross-layout support
   getNumberFromKeyEvent(e) {
-    // method 1: Check e.key (most reliable for modern browsers)
-    if (e.key && /^[1-9]$/.test(e.key)) { return parseInt(e.key); }
-    // method 2: Check e.code for physical key position (handles different layouts)
+    if (e.key && /^[1-9]$/.test(e.key)) return parseInt(e.key);
     if (e.code) {
-      const codeToNumber = {
-        'Digit1': 1, 'Digit2': 2, 'Digit3': 3, 'Digit4': 4, 'Digit5': 5,
-        'Digit6': 6, 'Digit7': 7, 'Digit8': 8, 'Digit9': 9
+      const map = {
+        Digit1: 1, Digit2: 2, Digit3: 3, Digit4: 4, Digit5: 5,
+        Digit6: 6, Digit7: 7, Digit8: 8, Digit9: 9
       };
-      if (codeToNumber[e.code]) { return codeToNumber[e.code]; }
+      if (map[e.code]) return map[e.code];
     }
     return null;
   }
@@ -176,39 +187,26 @@ class LookaheadMiniPopup {
 
   updateSelection() {
     if (!this.popup) return;
-    
     this.popup.querySelectorAll('.popup-result-item').forEach((item, index) => {
       item.classList.toggle('selected', index === this.selectedIndex);
     });
-    
-    // Scroll selected item into view
-    const selectedItem = this.popup.querySelector('.popup-result-item.selected');
-    if (selectedItem) {
-      selectedItem.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-    }
+    const selected = this.popup.querySelector('.popup-result-item.selected');
+    if (selected) selected.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
   }
 
   selectResult(index) {
     if (this.results[index]) {
-      // Navigate to the selected result
       window.location.href = this.results[index].url;
       this.hide();
     }
   }
-
-  escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-  }
 }
 
-// Global instance - but check if it already exists
+// Singleton — guard against double-injection
 if (!window.lookaheadMiniPopup) {
   window.lookaheadMiniPopup = new LookaheadMiniPopup();
 }
 
-// Listen for messages from background script
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === 'showMiniPopup') {
     window.lookaheadMiniPopup.show(request.results, request.currentIndex);

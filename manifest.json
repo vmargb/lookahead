@@ -9,6 +9,9 @@
   "browser_specific_settings": {
     "gecko": {
       "id": "@lookahead.vmargb",
+      "data_collection_permissions": {
+        "required": ["none"]
+      }
       "strict_min_version": "120.0"
     }
   },

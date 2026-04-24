@@ -1,13 +1,12 @@
 # 🔍 Look Ahead
 
 A fast, keyboard-friendly browser extension that intelligently **navigates search results while you sit back and relax** directly from the address bar.
-> No more clutter. Get to the best result in one go.
 
 This was created for one purpose: avoiding the the search page as often as possible.
 When frequently searching for pages, battling with the page-rank algorithm often becomes a nuisance when the top 3 results are often sufficient most of the time.
 
 ## Doesn't this feature already exist?
-Yes, Google's "I'm feeling lucky" does this, but Lookahead is a little different. This extension provides a consistent keyword or no keyword at all for any search engine. It provides its own scoring algorithm that can intelligently find your match as well as a hovering side menu that lets you quick-switch between alternate options, avoiding the standard search page completely.
+Yes, Google's "I'm feeling lucky" does this, but Lookahead is a little different. This extension provides a consistent keyword or no keyword at all for **any** search engine. It provides its own scoring algorithm that can intelligently find your match as well as a hovering side menu that lets you quick-switch between alternate options, avoiding the standard search page and unecessary back-and-forths completely.
 
 ![Extension Demo](demo.gif)
 
